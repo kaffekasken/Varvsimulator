@@ -1,4 +1,3 @@
-#from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 from dataclasses import dataclass, field
@@ -88,7 +87,16 @@ class GUI(ttk.Frame):
             inmatningslista[i-1].grid(row=(1 + counter1), column=(i - counter2 - 1), sticky = W)
             if i % 4 == 0 and i != 0:
                 counter1 += 2
-                counter2 += 4          
+                counter2 += 4   
+
+    def knappar(self) -> None:
+        """Skapar knapparna"""
+        self.startknappen = ttk.Button(self.root, text= "Grönt ljus", command= lambda: self.start()).grid(row=100, column = 2)
+        style = ttk.Style()
+        style.configure('Wild.TRadiobutton', background="White")
+        self.rullstartsval = StringVar()
+        self.rullstartsknapp = ttk.Checkbutton(self.root, text= "Rullstart", style= 'Wild.TRadiobutton', variable = self.rullstartsval,\
+                                                onvalue = "PÅ", offvalue = "AV").grid(row=99, column = 0)
         
     def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float) -> None:
         """Grafritningen"""
@@ -135,10 +143,7 @@ class GUI(ttk.Frame):
 
         plt.show()
     
-    def startknapp(self) -> None:
-        """Skapar startknappen"""
-        self.startknappen = ttk.Button(self.root, text= "Grönt ljus", command= lambda: self.start()).grid(row=100, column = 2)
-        
+
     def start(self) -> None:
         """Här startas simuleringen"""
         # Lista för inmatningsvärden
@@ -169,6 +174,10 @@ class GUI(ttk.Frame):
         radie_kurvlista     = [20, 20, 16, 10]
         längd_raka_lista    = [75, 344.4, 407.2, 467.8]
         längd_kurva_lista   = [194.4, 352.2, 442.8, 498]
+            
+        if self.rullstartsval.get() == "PÅ":
+            radie_kurvlista.insert(0, radie_kurvlista[-1])
+
         # Skapar bilen
         blixten_mcqueen     = Bil(MASSA_BIL= VARFÖR[0], UTVÄXLING= VARFÖR[1], VRIDMOMENT_MOTOR= VARFÖR[2], HJULRADIE= VARFÖR[3], ANTAL_MOTORER= VARFÖR[4], \
                                   BROMSKRAFT= VARFÖR[5], ANTAL_BROMSAR= VARFÖR[6], DÄCK_FRIKTION= VARFÖR[7], LUFTMOTSTÅNDS_KOEFFICIENT= VARFÖR[8], \
@@ -182,7 +191,7 @@ class GUI(ttk.Frame):
             position_blixten_mcqueen = Position(blixten_mcqueen, kylarköping)
             krafter_blixten_mcqueen = Krafter(blixten_mcqueen, kylarköping)
             krafter_blixten_mcqueen.kalkylera_maximala_kurvhastighet()
-            position_blixten_mcqueen.placering()
+            position_blixten_mcqueen.placering(self.rullstartsval.get())
             print(f"MASSA BIL: {VARFÖR[0]}, UTVÄXLING: {VARFÖR[1]}, VRIDMOMENT MOTOR: {VARFÖR[2]}, HJULRADIE: {VARFÖR[3]}, ANTAL MOTORER: {VARFÖR[4]}, BROMSKRAFT: {VARFÖR[5]},\
                 ANTAL_BROMSAR: {VARFÖR[6]}, DÄCK_FRIKTION: {VARFÖR[7]}, LUFTMOTSTÅNDS_KOEFFICIENT: {VARFÖR[8]}, SNITT_AREA_BIL: {VARFÖR[9]}, LYFTKRAFTS_KOEFFICIENT: {VARFÖR[10]},\
                 AREA_VINGE: {VARFÖR[11]}, CENTER_AV_MASSA_HÖJD: {VARFÖR[12]}, AVSTÅND_MELLAN_AXLAR: {VARFÖR[13]}, CENTER_AV_MASSA_LÄNGD: {VARFÖR[14]}, CENTER_AV_TRYCK_HÖJD: {VARFÖR[15]}, \
@@ -191,9 +200,6 @@ class GUI(ttk.Frame):
                             blixten_mcqueen.däckgrepp, blixten_mcqueen.viktförändring_fram)
         except:
             print("Dina inmatningsvärden är troligtvis för stora eller för små")
-
-    #def __setitem__(self, key: str, value: Any) -> None:
-    #    setattr(self, key, value)
 
 @dataclass(slots=True)
 class Bil:
@@ -266,7 +272,7 @@ class Bana:
     längd_raka_lista:    list[float] = field(default_factory= lambda: [0])
     längd_kurva_lista:   list[float] = field(default_factory= lambda: [0])
     radie_kurvlista:     list[float] = field(default_factory= lambda: [0])
-    hastighet_kurvlista: list[float] = field(default_factory= list) # Denna måste vara en tom lista!
+    hastighet_kurvlista: list[float] = field(default_factory= list) # Denna måste börja som en tom lista!
     tid:                 list[float] = field(default_factory= lambda: [0])
     LUFTENS_DENSITET:    float = 1.3
     GRAVITATION:         float = 9.82
@@ -282,8 +288,10 @@ class Position:
         self.bil  = bil
         self.bana = bana
         self.steg_storlek = 0.001
-    def placering(self) -> None:
+    def placering(self, rullstartsval) -> None:
         """Använder resterande metoder för att ta reda på bilens placering"""
+        if rullstartsval == "PÅ":
+            self.bil.hastighet[0] = self.bana.hastighet_kurvlista[0]
         raksträcka = True # Det antas att det är varannan raksträcka och kurva
         for i in range(len(self.bana.längd_raka_lista + self.bana.längd_kurva_lista)):
             if raksträcka:
@@ -371,7 +379,7 @@ class Krafter:
                 bättre_approximerad_kurvhastighet = np.sqrt(self.däckgrepp(approximerad_kurvhastighet)/self.bil.MASSA_BIL*kurvradie)
                 approximerad_kurvhastighet = bättre_approximerad_kurvhastighet
             self.bana.hastighet_kurvlista.append(approximerad_kurvhastighet)
-            #print(approximerad_kurvhastighet)
+            print(approximerad_kurvhastighet)
 
     def luftmotstånd(self, hastighet: float) -> float:
         """Kalkylerar bilens luftmotstånd"""
@@ -451,7 +459,7 @@ def main():
     gui.etikett()
     gui.inmatning()
     gui.rutnät()
-    gui.startknapp()
+    gui.knappar()
     root.mainloop()
 
 if __name__ == '__main__':
