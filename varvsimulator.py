@@ -114,6 +114,8 @@ class GUI(ttk.Frame):
                                                     onvalue = "PÅ", offvalue = "AV").grid(row=99, column = 0)
         self.bana1           = ttk.Radiobutton(self.root, text= "Standardbana", style= 'Wild.TRadiobutton', variable= self.banfil,\
                                                     value= 'standardbana.txt').grid(row=99, column = 1)
+        self.bana2           = ttk.Radiobutton(self.root, text= "Hockenheim", style= 'Wild.TRadiobutton', variable= self.banfil,\
+                                                    value= 'hockenheim.txt').grid(row=99, column = 2)
         
     def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float) -> None:
         """Grafritningen"""
