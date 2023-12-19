@@ -3,6 +3,7 @@ import numpy as np
 from dataclasses import dataclass, field
 from tkinter import *
 from tkinter import ttk # Varför följer inte den här med "*"?
+import sys
 
 class GUI(ttk.Frame):
     """Fönster som frågar användaren om parametrarna till bilen och banan"""
@@ -13,6 +14,20 @@ class GUI(ttk.Frame):
         self.root.title("Varvsimulator")
         self.root.geometry("550x250")
         self.root["bg"] = "White"
+        self.radie_kurvlista     = []
+        self.längd_raka_lista    = []
+        self.längd_kurva_lista   = []
+        self.banfil = StringVar() # Lägg in 'standardbana.txt' här istället när nästa bana är inlagd
+
+    def fyllabaninformationslistorna(self, banfil) -> None:
+        """Fyller listorna med information om banan"""
+        baninformationslista = [self.radie_kurvlista, self.längd_raka_lista, self.längd_kurva_lista]
+        for lista in baninformationslista:
+            lista.clear()
+        with open(banfil, 'r', encoding='utf-8') as file:
+            for lista in baninformationslista:
+                for ord in file.readline().split():
+                    lista.append(float(ord))
 
     def etikett(self) -> None: # Lyckas inte göra en for loop här
         """Skapar etiketterna till inmatningarna och placerar dem där de ska vara"""
@@ -91,12 +106,14 @@ class GUI(ttk.Frame):
 
     def knappar(self) -> None:
         """Skapar knapparna"""
-        self.startknappen = ttk.Button(self.root, text= "Grönt ljus", command= lambda: self.start()).grid(row=100, column = 2)
         style = ttk.Style()
         style.configure('Wild.TRadiobutton', background="White")
-        self.rullstartsval = StringVar()
+        self.startknappen    = ttk.Button(self.root, text= "Grönt ljus", command= lambda: self.start()).grid(row=100, column = 2)
+        self.rullstartsval   = StringVar()
         self.rullstartsknapp = ttk.Checkbutton(self.root, text= "Rullstart", style= 'Wild.TRadiobutton', variable = self.rullstartsval,\
-                                                onvalue = "PÅ", offvalue = "AV").grid(row=99, column = 0)
+                                                    onvalue = "PÅ", offvalue = "AV").grid(row=99, column = 0)
+        self.bana1           = ttk.Radiobutton(self.root, text= "Standardbana", style= 'Wild.TRadiobutton', variable= self.banfil,\
+                                                    value= 'standardbana.txt').grid(row=99, column = 1)
         
     def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float) -> None:
         """Grafritningen"""
@@ -170,13 +187,7 @@ class GUI(ttk.Frame):
                     VARFÖR.append(startvärdeslista[i])   
             else:
                 VARFÖR.append(startvärdeslista[i])
-        # Ska göras till Standard bana nr. 1
-        radie_kurvlista     = [20, 20, 16, 10]
-        längd_raka_lista    = [75, 344.4, 407.2, 467.8]
-        längd_kurva_lista   = [194.4, 352.2, 442.8, 498]
-            
-        if self.rullstartsval.get() == "PÅ":
-            radie_kurvlista.insert(0, radie_kurvlista[-1])
+
 
         # Skapar bilen
         blixten_mcqueen     = Bil(MASSA_BIL= VARFÖR[0], UTVÄXLING= VARFÖR[1], VRIDMOMENT_MOTOR= VARFÖR[2], HJULRADIE= VARFÖR[3], ANTAL_MOTORER= VARFÖR[4], \
@@ -184,14 +195,20 @@ class GUI(ttk.Frame):
                                     SNITT_AREA_BIL= VARFÖR[9], LYFTKRAFTS_KOEFFICIENT= VARFÖR[10], AREA_VINGE= VARFÖR[11], CENTER_AV_MASSA_HÖJD= VARFÖR[12], \
                                         AVSTÅND_MELLAN_AXLAR= VARFÖR[13], CENTER_AV_MASSA_LÄNGD= VARFÖR[14], CENTER_AV_TRYCK_HÖJD= VARFÖR[15], CENTER_AV_TRYCK_LÄNGD= VARFÖR[16])
         # Skapar banan
-        kylarköping         = Bana(längd_raka_lista= längd_raka_lista, längd_kurva_lista= längd_kurva_lista, radie_kurvlista= radie_kurvlista, \
+        kylarköping         = Bana(längd_raka_lista= self.längd_raka_lista, längd_kurva_lista= self.längd_kurva_lista, radie_kurvlista= self.radie_kurvlista, \
                                    LUFTENS_DENSITET= VARFÖR[17], GRAVITATION= VARFÖR[18])
+        try:
+            self.fyllabaninformationslistorna(self.banfil.get())
+        except:
+            print("Det gick inte att läsa in banans information")
+            sys.exit()
+
         # Startar simuleringen
         try:
             position_blixten_mcqueen = Position(blixten_mcqueen, kylarköping)
             krafter_blixten_mcqueen = Krafter(blixten_mcqueen, kylarköping)
-            krafter_blixten_mcqueen.kalkylera_maximala_kurvhastighet()
-            position_blixten_mcqueen.placering(self.rullstartsval.get())
+            krafter_blixten_mcqueen.kalkylera_maximala_kurvhastighet(self.rullstartsval.get())
+            position_blixten_mcqueen.placering()
             print(f"MASSA BIL: {VARFÖR[0]}, UTVÄXLING: {VARFÖR[1]}, VRIDMOMENT MOTOR: {VARFÖR[2]}, HJULRADIE: {VARFÖR[3]}, ANTAL MOTORER: {VARFÖR[4]}, BROMSKRAFT: {VARFÖR[5]},\
                 ANTAL_BROMSAR: {VARFÖR[6]}, DÄCK_FRIKTION: {VARFÖR[7]}, LUFTMOTSTÅNDS_KOEFFICIENT: {VARFÖR[8]}, SNITT_AREA_BIL: {VARFÖR[9]}, LYFTKRAFTS_KOEFFICIENT: {VARFÖR[10]},\
                 AREA_VINGE: {VARFÖR[11]}, CENTER_AV_MASSA_HÖJD: {VARFÖR[12]}, AVSTÅND_MELLAN_AXLAR: {VARFÖR[13]}, CENTER_AV_MASSA_LÄNGD: {VARFÖR[14]}, CENTER_AV_TRYCK_HÖJD: {VARFÖR[15]}, \
@@ -269,9 +286,9 @@ class Bil:
 @dataclass(slots=True)
 class Bana:
     """Dataklass med banans parametrar"""
-    längd_raka_lista:    list[float] = field(default_factory= lambda: [0])
-    längd_kurva_lista:   list[float] = field(default_factory= lambda: [0])
-    radie_kurvlista:     list[float] = field(default_factory= lambda: [0])
+    längd_raka_lista:    list[float] = field(default_factory= list)
+    längd_kurva_lista:   list[float] = field(default_factory= list)
+    radie_kurvlista:     list[float] = field(default_factory= list)
     hastighet_kurvlista: list[float] = field(default_factory= list) # Denna måste börja som en tom lista!
     tid:                 list[float] = field(default_factory= lambda: [0])
     LUFTENS_DENSITET:    float = 1.3
@@ -288,10 +305,8 @@ class Position:
         self.bil  = bil
         self.bana = bana
         self.steg_storlek = 0.001
-    def placering(self, rullstartsval) -> None:
+    def placering(self) -> None:
         """Använder resterande metoder för att ta reda på bilens placering"""
-        if rullstartsval == "PÅ":
-            self.bil.hastighet[0] = self.bana.hastighet_kurvlista[0]
         raksträcka = True # Det antas att det är varannan raksträcka och kurva
         for i in range(len(self.bana.längd_raka_lista + self.bana.längd_kurva_lista)):
             if raksträcka:
@@ -371,7 +386,7 @@ class Krafter:
         self.bil  = bil
         self.bana = bana
 
-    def kalkylera_maximala_kurvhastighet(self) -> None:
+    def kalkylera_maximala_kurvhastighet(self, rullstartsval) -> None:
         """Kalkylerar maximala möjliga kurvhastighet. Detta sker i 3 steg. 1. Utan downforce 2. Med downforce 3. Med downforce igen för lite mer precision."""
         for kurvradie in self.bana.radie_kurvlista:
             approximerad_kurvhastighet = np.sqrt(self.bil.DÄCK_FRIKTION*self.bana.GRAVITATION*kurvradie)
@@ -379,7 +394,9 @@ class Krafter:
                 bättre_approximerad_kurvhastighet = np.sqrt(self.däckgrepp(approximerad_kurvhastighet)/self.bil.MASSA_BIL*kurvradie)
                 approximerad_kurvhastighet = bättre_approximerad_kurvhastighet
             self.bana.hastighet_kurvlista.append(approximerad_kurvhastighet)
-            print(approximerad_kurvhastighet)
+        if rullstartsval == "PÅ":
+            self.bil.hastighet[0] = self.bana.hastighet_kurvlista[-1]
+            print(self.bana.hastighet_kurvlista)
 
     def luftmotstånd(self, hastighet: float) -> float:
         """Kalkylerar bilens luftmotstånd"""
@@ -430,7 +447,7 @@ def terminalstart(MASSA_BIL=  Bil.get_massabil(), UTVÄXLING= Bil.get_utväxling
                 SNITT_AREA_BIL= Bil.get_snitt_area_bil(), LYFTKRAFTS_KOEFFICIENT= Bil.get_lyftkrafts_koefficient(), AREA_VINGE= Bil.get_area_vinge(), CENTER_AV_MASSA_HÖJD= Bil.get_center_av_massa_höjd(),\
                 AVSTÅND_MELLAN_AXLAR= Bil.get_avstånd_mellan_axlar(), CENTER_AV_MASSA_LÄNGD= Bil.get_center_av_massa_längd(), CENTER_AV_TRYCK_HÖJD= Bil.get_center_av_tryck_höjd(), \
                 CENTER_AV_TRYCK_LÄNGD= Bil.get_center_av_tryck_längd(), LUFTENS_DENSITET= Bana.get_luftens_densitet(),GRAVITATION= Bana.get_gravitation()) -> None:
-    """Möjliggör för att köra genom terminalen"""
+    """Möjliggör för att köra genom terminalen. Kör endast standardbanan"""
     radie_kurvlista     = [20, 20, 16, 10]
     längd_raka_lista    = [75, 344.4, 407.2, 467.8]
     längd_kurva_lista   = [194.4, 352.2, 442.8, 498]
