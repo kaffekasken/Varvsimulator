@@ -316,7 +316,7 @@ class Position:
                 Position.hastighet(self, self.bana.längd_raka_lista[i//2], hastighet_slut)
                 raksträcka = False
             else:
-                Position.kurvhastighet(self, self.bana.längd_kurva_lista[i//2])
+                Position.kurvhastighet(self, self.bana.längd_kurva_lista[i//2], hastighet_slut)
                 raksträcka = True
 
     def hastighet(self, position_slut: float, hastighet_slut: float) -> None:
@@ -337,10 +337,24 @@ class Position:
 
                 Position.uppdatera_information(self, position_nu, hastighet_nu, tid_nu)
 
-    def kurvhastighet(self, position_slut: float) -> None:
+    def kurvhastighet(self, position_slut: float, kurvhastighet) -> None:
         """Kalkylerar kurvhastigheten"""
+        while self.bil.hastighet[-1] < kurvhastighet and self.bil.position[-1] <= position_slut:
+            hastighet_nu = self.bil.hastighet[-1] + Position.acceleration(self)*self.steg_storlek
+            position_nu = self.bil.position[-1] + self.bil.hastighet[-1]*self.steg_storlek
+            tid_nu = self.bana.tid[-1] + 1*self.steg_storlek
+
+            Position.uppdatera_information(self, position_nu, hastighet_nu, tid_nu)
+
+        while self.bil.hastighet[-1] > kurvhastighet and self.bil.position[-1] <= position_slut:
+            hastighet_nu = self.bil.hastighet[-1] + (Position.retardation(self) - Position.acceleration(self))*self.steg_storlek
+            position_nu = self.bil.position[-1] + self.bil.hastighet[-1]*self.steg_storlek
+            tid_nu = self.bana.tid[-1] + 1*self.steg_storlek
+
+            Position.uppdatera_information(self, position_nu, hastighet_nu, tid_nu)
+
         while self.bil.position[-1] <= position_slut:
-            hastighet_nu = self.bil.hastighet[-1]
+            hastighet_nu = kurvhastighet
             position_nu = self.bil.position[-1] + self.bil.hastighet[-1]*self.steg_storlek
             tid_nu = self.bana.tid[-1] + 1*self.steg_storlek  
 
@@ -398,7 +412,7 @@ class Krafter:
             self.bana.hastighet_kurvlista.append(approximerad_kurvhastighet)
         if rullstartsval == "PÅ":
             self.bil.hastighet[0] = self.bana.hastighet_kurvlista[-1]
-            print(self.bana.hastighet_kurvlista)
+        #print(self.bana.hastighet_kurvlista)
 
     def luftmotstånd(self, hastighet: float) -> float:
         """Kalkylerar bilens luftmotstånd"""
