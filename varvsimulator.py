@@ -116,6 +116,8 @@ class GUI(ttk.Frame):
                                                     value= 'standardbana.txt').grid(row=99, column = 1)
         self.bana2           = ttk.Radiobutton(self.root, text= "Hockenheim", style= 'Wild.TRadiobutton', variable= self.banfil,\
                                                     value= 'hockenheim.txt').grid(row=99, column = 2)
+        self.bana3           = ttk.Radiobutton(self.root, text= "Skidpad", style= 'Wild.TRadiobutton', variable= self.banfil,\
+                                                    value= 'skidpad.txt').grid(row=99, column = 3)
         
     def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float) -> None:
         """Grafritningen"""
@@ -149,7 +151,7 @@ class GUI(ttk.Frame):
 
         plt.show()
 
-        fig2, (ax1, ax2) = plt.subplots(2, 1, layout='constrained')
+        fig2, (ax1, ax2, ax3) = plt.subplots(3, 1, layout='constrained')
        
         ax1.plot(tid, däckgrepp)
         ax1.set_xlabel('Tid (s)')
@@ -159,6 +161,10 @@ class GUI(ttk.Frame):
         ax2.plot(tid, viktförändring_fram)
         ax2.set_ylabel('Vikt framaxel (kg)')
         ax2.grid(True)
+
+        ax3.plot(sträcka, hastighet)
+        ax3.set_ylabel('Hastighet / Sträcka')
+        ax3.grid(True)
 
         plt.show()
     
@@ -233,12 +239,12 @@ class Bil:
     ANTAL_BROMSAR:      int   = 4
     DÄCK_FRIKTION:      float = 0.9
     # För verkande krafter
-    LUFTMOTSTÅNDS_KOEFFICIENT: float = 4
-    SNITT_AREA_BIL:            float = 1.3
-    LYFTKRAFTS_KOEFFICIENT:    float = -7
+    LUFTMOTSTÅNDS_KOEFFICIENT: float = 1.5
+    SNITT_AREA_BIL:            float = 1
+    LYFTKRAFTS_KOEFFICIENT:    float = -6
     AREA_VINGE:                float = 1
-    CENTER_AV_MASSA_HÖJD:      float = 0.7
-    AVSTÅND_MELLAN_AXLAR:      float = 2
+    CENTER_AV_MASSA_HÖJD:      float = 0.23
+    AVSTÅND_MELLAN_AXLAR:      float = 1.535
     CENTER_AV_MASSA_LÄNGD:     float = 0.9
     CENTER_AV_TRYCK_HÖJD:      float = 0.5
     CENTER_AV_TRYCK_LÄNGD:     float = 1
