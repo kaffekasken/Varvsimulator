@@ -1,0 +1,3 @@
+with open('endurance.txt', 'r', encoding='utf-8') as file:
+    for längd in (file.readline().split()):
+        print(float(längd) + 1183.0783223213018, end=" ")

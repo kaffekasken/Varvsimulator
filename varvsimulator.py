@@ -120,6 +120,8 @@ class GUI(ttk.Frame):
                                                     value= 'skidpad.txt').grid(row=99, column = 3)
         self.bana4           = ttk.Radiobutton(self.root, text= "Acceleration", style= 'Wild.TRadiobutton', variable= self.banfil,\
                                                     value= 'acceleration.txt').grid(row=100, column = 0)
+        self.bana5           = ttk.Radiobutton(self.root, text= "Endurance", style= 'Wild.TRadiobutton', variable= self.banfil,\
+                                                    value= 'endurance.txt').grid(row=100, column = 1)
         
     def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float, vridmoment: float) -> None:
         """Grafritningen"""
@@ -390,9 +392,10 @@ class Position:
         max_vridmoment_rpm = 14000
         if rpm > max_vridmoment_rpm:
             vridmoment = min_vridmoment + (max_rpm - rpm) * (vridmoment - min_vridmoment) / (max_rpm - max_vridmoment_rpm)
-        print(vridmoment)
+
         accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*((vridmoment + mängd_bly_i_skon)\
                      - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)
+        
         for i in range(20):
             if Krafter.viktöverföring(self, accel) > 0.3*self.bil.MASSA_BIL and rpm < max_rpm:
                 break
@@ -400,6 +403,7 @@ class Position:
                 accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*((self.bil.VRIDMOMENT_MOTOR + mängd_bly_i_skon)\
                      - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)
                 mängd_bly_i_skon -= self.bil.VRIDMOMENT_MOTOR/20
+
         Krafter.uppdatera_krafter(self, vridmoment)
         return accel
 
