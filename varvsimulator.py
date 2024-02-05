@@ -122,7 +122,7 @@ class GUI(ttk.Frame):
                                                     value= 'acceleration.txt').grid(row=100, column = 0)
         self.bana5           = ttk.Radiobutton(self.root, text= "Endurance", style= 'Wild.TRadiobutton', variable= self.banfil,\
                                                     value= 'endurance.txt').grid(row=100, column = 1)
-        
+
     def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float, vridmoment: float) -> None:
         """Grafritningen"""
         fig1, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, layout='constrained')
@@ -171,11 +171,22 @@ class GUI(ttk.Frame):
         ax3.grid(True)
         
         ax4.plot(tid, vridmoment)
-        ax4.set_ylabel('Vridmoment (Nm)')
+        ax4.set_ylabel('Torque (Nm)')
         ax4.grid(True)
 
         plt.show()
     
+    def spara_data(self, tid: list = [], hastighet: list = []) -> None:
+        """Sparar data till en fil"""
+        with open('sparadata.txt', 'w') as file:
+            file.truncate(0)   
+        with open('sparadata.txt', 'a', encoding='utf-8') as file:
+            for i in range(len(tid)):
+                file.write(f"{tid[i]} ")
+            file.write("\n \n")            
+            for j in range (len(hastighet)):
+                file.write(f"{hastighet[j]} ")
+            file.write("\n")
 
     def start(self) -> None:
         """Här startas simuleringen"""
@@ -231,6 +242,7 @@ class GUI(ttk.Frame):
                 CENTER_AV_TRYCK_LÄNGD: {VARFÖR[16]}, LUFTENS_DENSITET: {VARFÖR[17]}, GRAVITATION: {VARFÖR[18]}")
             self.grafritning(kylarköping.tid, blixten_mcqueen.position, blixten_mcqueen.hastighet, blixten_mcqueen.luftmotstånd, blixten_mcqueen.downforce,\
                             blixten_mcqueen.däckgrepp, blixten_mcqueen.viktförändring_fram, blixten_mcqueen.vridmoment)
+            #self.spara_data(kylarköping.tid, blixten_mcqueen.hastighet)
         except:
             print("Dina inmatningsvärden är troligtvis för stora eller för små")
 
