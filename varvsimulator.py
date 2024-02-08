@@ -250,7 +250,7 @@ class GUI(ttk.Frame):
 class Bil:
     """Dataklass med bilens parametrar"""
     # För position
-    MASSA_BIL:          float = 285
+    MASSA_BIL:          float = 270
     UTVÄXLING:          float = 14
     VRIDMOMENT_MOTOR:   float = 21
     HJULRADIE:          float = 0.23
@@ -402,19 +402,25 @@ class Position:
         rpm = Position.kalkylera_rpm(self, self.bil.hastighet[-1])
         max_rpm = 20000
         max_vridmoment_rpm = 14000
+
         if rpm > max_vridmoment_rpm:
             vridmoment = min_vridmoment + (max_rpm - rpm) * (vridmoment - min_vridmoment) / (max_rpm - max_vridmoment_rpm)
 
-        accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*((vridmoment + mängd_bly_i_skon)\
+        accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*(vridmoment\
                      - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)
-        
+
         for i in range(20):
-            if Krafter.viktöverföring(self, accel) > 0.3*self.bil.MASSA_BIL and rpm < max_rpm:
+            if rpm < max_rpm:
                 break
             else:
                 accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*((self.bil.VRIDMOMENT_MOTOR + mängd_bly_i_skon)\
                      - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)
                 mängd_bly_i_skon -= self.bil.VRIDMOMENT_MOTOR/20
+
+        nuvarande_vikt_fram = Krafter.viktöverföring(self, accel)
+        vikt_fram = self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR
+        if nuvarande_vikt_fram < vikt_fram:
+            accel = nuvarande_vikt_fram/vikt_fram * accel
 
         Krafter.uppdatera_krafter(self, vridmoment)
         return accel
@@ -457,7 +463,7 @@ class Krafter:
 
     def luftmotstånd(self, hastighet: float) -> float:
         """Kalkylerar bilens luftmotstånd"""
-        drag = (0.5*self.bana.LUFTENS_DENSITET*self.bil.LUFTMOTSTÅNDS_KOEFFICIENT*self.bil.SNITT_AREA_BIL*hastighet**2)
+        drag = 0.5*self.bana.LUFTENS_DENSITET*self.bil.LUFTMOTSTÅNDS_KOEFFICIENT*self.bil.SNITT_AREA_BIL*hastighet**2
         return drag
     
     def downforce(self, hastighet: float) -> float:
@@ -478,17 +484,16 @@ class Krafter:
     
     def däckgrepp(self, hastighet: float) -> float:
         """Kalkylerar däckgreppet"""
-        normalkraft = -(self.bil.MASSA_BIL * self.bana.GRAVITATION) + Krafter.downforce(self, hastighet)
-        däckgrepp = self.bil.DÄCK_FRIKTION * -normalkraft
+        normalkraft = self.bil.MASSA_BIL * self.bana.GRAVITATION - Krafter.downforce(self, hastighet)
+        däckgrepp = self.bil.DÄCK_FRIKTION * normalkraft
         return däckgrepp
     
     def viktöverföring(self, acceleration: float) -> float:
         """Viktöverföringen kalkyleras genom att räkna på den nuvarande vikten på framaxeln"""
-        viktförändring_fram = self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR \
-                            + (-acceleration*self.bil.CENTER_AV_MASSA_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
-                            - Krafter.luftmotstånd(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
-                            - acceleration*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR\
-                            - Krafter.downforce(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_LÄNGD/(self.bil.AVSTÅND_MELLAN_AXLAR)) / self.bana.GRAVITATION
+        viktförändring_fram = self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR + \
+                            (- self.bil.MASSA_BIL*acceleration*self.bil.CENTER_AV_MASSA_HÖJD\
+                            - Krafter.luftmotstånd(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_HÖJD\
+                            - Krafter.downforce(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_LÄNGD) / (self.bil.AVSTÅND_MELLAN_AXLAR * self.bana.GRAVITATION)
         return viktförändring_fram
 
     def uppdatera_krafter(self, vridmoment) -> None:
