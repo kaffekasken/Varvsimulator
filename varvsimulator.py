@@ -395,8 +395,8 @@ class Position:
 
     def retardation(self) -> float:
         """Räknar ut retardation vid nuvarande tidpunkt om bilen bromsar"""
-        retardationen = -self.bil.ANTAL_BROMSAR*(self.bil.BROMSKRAFT\
-                 + Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)
+        retardationen = -self.bil.ANTAL_BROMSAR*(self.bil.BROMSKRAFT)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)\
+              - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL
         return retardationen
 
     def acceleration(self) -> float:
@@ -411,31 +411,27 @@ class Position:
         if rpm > max_vridmoment_rpm:
             vridmoment = min_vridmoment + (max_rpm - rpm) * (vridmoment - min_vridmoment) / (max_rpm - max_vridmoment_rpm)
 
-        accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*(vridmoment\
-                     - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)
+        accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*(vridmoment)/(self.bil.HJULRADIE*self.bil.MASSA_BIL) \
+              - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL
 
         for i in range(20):
             if rpm < max_rpm:
                 break
             else:
-                accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*((self.bil.VRIDMOMENT_MOTOR + mängd_bly_i_skon)\
-                     - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)
+                accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*((self.bil.VRIDMOMENT_MOTOR + mängd_bly_i_skon))\
+                     /(self.bil.HJULRADIE*self.bil.MASSA_BIL) - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL
                 mängd_bly_i_skon -= self.bil.VRIDMOMENT_MOTOR/20
 
-        nuvarande_vikt_fram = Krafter.viktöverföring_fram(self, accel)
-        nuvarande_vikt_bak = Krafter.viktöverföring_bak(self, accel)
-        #vikt_fram = self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR
-        vikt_fram = self.bil.MASSA_BIL/2
-        vikt_bak = self.bil.MASSA_BIL/2
-        
-        if nuvarande_vikt_fram < vikt_fram and nuvarande_vikt_bak < vikt_bak:
-            accel = nuvarande_vikt_fram/vikt_fram * nuvarande_vikt_bak/vikt_bak * accel
+        normalkraft_framaxel = Krafter.viktöverföring_fram(self, accel) * self.bana.GRAVITATION
+        normalkraft_bakaxel = Krafter.viktöverföring_bak(self, accel) * self.bana.GRAVITATION
+        potentiell_kraft_framåt = accel*self.bil.MASSA_BIL/2
 
-        elif nuvarande_vikt_fram < vikt_fram:
-            accel = nuvarande_vikt_fram/vikt_fram * accel
-        
-        elif nuvarande_vikt_bak < vikt_bak:
-            accel = nuvarande_vikt_bak/vikt_bak * accel
+        if normalkraft_framaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt and normalkraft_bakaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
+            accel = accel * (normalkraft_framaxel * normalkraft_bakaxel * self.bil.DÄCK_FRIKTION**2) / (potentiell_kraft_framåt**2)
+        elif normalkraft_framaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
+            accel = accel * (normalkraft_framaxel * self.bil.DÄCK_FRIKTION) / potentiell_kraft_framåt
+        elif normalkraft_bakaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
+            accel = accel * (normalkraft_bakaxel * self.bil.DÄCK_FRIKTION) / potentiell_kraft_framåt
 
         Krafter.uppdatera_krafter(self, vridmoment)
         return accel
@@ -488,10 +484,10 @@ class Krafter:
     
     def magic(self, sidohastighet: float) -> float:
         """Kalkylerar den laterala kraften på däcken genom Pacejkas 'magic formula'. Inte användbar ännu"""
-        styvhetsfaktor = 0.714
-        formfaktor = 1.4
-        maxvärdet = 1.00
-        grafkurvfaktor = -0.20
+        styvhetsfaktor = 0
+        formfaktor = 0
+        maxvärdet = 0
+        grafkurvfaktor = 0
         slip_angle = np.arctan(sidohastighet, self.bil.hastighet[-1])
         lateral_kraft_på_däck = maxvärdet*np.sin(formfaktor*np.arctan(styvhetsfaktor*slip_angle\
                                                 - grafkurvfaktor*(styvhetsfaktor*slip_angle - np.arctan(styvhetsfaktor*slip_angle))))
