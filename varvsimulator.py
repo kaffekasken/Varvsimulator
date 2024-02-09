@@ -123,7 +123,7 @@ class GUI(ttk.Frame):
         self.bana5           = ttk.Radiobutton(self.root, text= "Endurance", style= 'Wild.TRadiobutton', variable= self.banfil,\
                                                     value= 'endurance.txt').grid(row=100, column = 1)
 
-    def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float, vridmoment: float) -> None:
+    def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float, viktförändring_bak: float, vridmoment: float) -> None:
         """Grafritningen"""
         fig1, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, layout='constrained')
        # graflista = [ax1, ax2, ax3, ax4]
@@ -166,9 +166,13 @@ class GUI(ttk.Frame):
         ax2.set_ylabel('Vikt framaxel (kg)')
         ax2.grid(True)
 
-        ax3.plot(sträcka, hastighet)
-        ax3.set_ylabel('Hastighet / Sträcka')
+        ax3.plot(tid, viktförändring_bak)
+        ax3.set_ylabel('Vikt bakaxel (kg)')
         ax3.grid(True)
+
+        #ax3.plot(sträcka, hastighet)
+        #ax3.set_ylabel('Hastighet / Sträcka')
+        #ax3.grid(True)
         
         ax4.plot(tid, vridmoment)
         ax4.set_ylabel('Torque (Nm)')
@@ -241,7 +245,7 @@ class GUI(ttk.Frame):
                 AREA_VINGE: {VARFÖR[11]}, CENTER_AV_MASSA_HÖJD: {VARFÖR[12]}, AVSTÅND_MELLAN_AXLAR: {VARFÖR[13]}, CENTER_AV_MASSA_LÄNGD: {VARFÖR[14]}, CENTER_AV_TRYCK_HÖJD: {VARFÖR[15]}, \
                 CENTER_AV_TRYCK_LÄNGD: {VARFÖR[16]}, LUFTENS_DENSITET: {VARFÖR[17]}, GRAVITATION: {VARFÖR[18]}")
             self.grafritning(kylarköping.tid, blixten_mcqueen.position, blixten_mcqueen.hastighet, blixten_mcqueen.luftmotstånd, blixten_mcqueen.downforce,\
-                            blixten_mcqueen.däckgrepp, blixten_mcqueen.viktförändring_fram, blixten_mcqueen.vridmoment)
+                            blixten_mcqueen.däckgrepp, blixten_mcqueen.viktförändring_fram, blixten_mcqueen.viktförändring_bak, blixten_mcqueen.vridmoment)
             #self.spara_data(kylarköping.tid, blixten_mcqueen.hastighet)
         except:
             print("Dina inmatningsvärden är troligtvis för stora eller för små")
@@ -275,6 +279,7 @@ class Bil:
     downforce:           list[float] = field(default_factory= lambda: [0])
     däckgrepp:           list[float] = field(default_factory= lambda: [0])
     viktförändring_fram: list[float] = field(default_factory= lambda: [0])
+    viktförändring_bak:  list[float] = field(default_factory= lambda: [0])
     vridmoment:          list[float] = field(default_factory= lambda: [0])
 #    @property #TypeError: unsupported operand type(s) for *: 'property' and 'float'. VAFAN???
     def get_massabil(MASSA_BIL= MASSA_BIL) -> float:
@@ -417,10 +422,20 @@ class Position:
                      - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)
                 mängd_bly_i_skon -= self.bil.VRIDMOMENT_MOTOR/20
 
-        nuvarande_vikt_fram = Krafter.viktöverföring(self, accel)
-        vikt_fram = self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR
-        if nuvarande_vikt_fram < vikt_fram:
+        nuvarande_vikt_fram = Krafter.viktöverföring_fram(self, accel)
+        nuvarande_vikt_bak = Krafter.viktöverföring_bak(self, accel)
+        #vikt_fram = self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR
+        vikt_fram = self.bil.MASSA_BIL/2
+        vikt_bak = self.bil.MASSA_BIL/2
+        
+        if nuvarande_vikt_fram < vikt_fram and nuvarande_vikt_bak < vikt_bak:
+            accel = nuvarande_vikt_fram/vikt_fram * nuvarande_vikt_bak/vikt_bak * accel
+
+        elif nuvarande_vikt_fram < vikt_fram:
             accel = nuvarande_vikt_fram/vikt_fram * accel
+        
+        elif nuvarande_vikt_bak < vikt_bak:
+            accel = nuvarande_vikt_bak/vikt_bak * accel
 
         Krafter.uppdatera_krafter(self, vridmoment)
         return accel
@@ -488,20 +503,29 @@ class Krafter:
         däckgrepp = self.bil.DÄCK_FRIKTION * normalkraft
         return däckgrepp
     
-    def viktöverföring(self, acceleration: float) -> float:
+    def viktöverföring_fram(self, acceleration: float) -> float:
         """Viktöverföringen kalkyleras genom att räkna på den nuvarande vikten på framaxeln"""
         viktförändring_fram = self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR + \
-                            (- self.bil.MASSA_BIL*acceleration*self.bil.CENTER_AV_MASSA_HÖJD\
-                            - Krafter.luftmotstånd(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_HÖJD\
-                            - Krafter.downforce(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_LÄNGD) / (self.bil.AVSTÅND_MELLAN_AXLAR * self.bana.GRAVITATION)
+                            (- self.bil.MASSA_BIL*acceleration*self.bil.CENTER_AV_MASSA_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
+                            - Krafter.luftmotstånd(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
+                            - Krafter.downforce(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR) / self.bana.GRAVITATION
         return viktförändring_fram
+    
+    def viktöverföring_bak(self, acceleration: float) -> float:
+        """Viktöverföringen kalkyleras genom att räkna på den nuvarande vikten på framaxeln"""
+        viktförändring_bak = self.bil.MASSA_BIL - self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR + \
+                            (+ self.bil.MASSA_BIL*acceleration*self.bil.CENTER_AV_MASSA_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
+                            + Krafter.luftmotstånd(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
+                            - Krafter.downforce(self, self.bil.hastighet[-1])*(self.bil.AVSTÅND_MELLAN_AXLAR-self.bil.CENTER_AV_TRYCK_LÄNGD)/self.bil.AVSTÅND_MELLAN_AXLAR) / self.bana.GRAVITATION
+        return viktförändring_bak
 
     def uppdatera_krafter(self, vridmoment) -> None:
         """Uppdaterar listorna som innehåller informationen om krafterna för att kunna göra en graf"""
         self.bil.luftmotstånd.append(Krafter.luftmotstånd(self, self.bil.hastighet[-1]))
         self.bil.downforce.append(Krafter.downforce(self, self.bil.hastighet[-1]))
         self.bil.däckgrepp.append(Krafter.däckgrepp(self, self.bil.hastighet[-1]))
-        self.bil.viktförändring_fram.append(Krafter.viktöverföring(self, self.bil.hastighet[-1]))
+        self.bil.viktförändring_fram.append(Krafter.viktöverföring_fram(self, self.bil.hastighet[-1]))
+        self.bil.viktförändring_bak.append(Krafter.viktöverföring_bak(self, self.bil.hastighet[-1]))
         self.bil.vridmoment.append(vridmoment)
 
 def main():
