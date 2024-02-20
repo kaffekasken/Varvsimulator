@@ -397,6 +397,17 @@ class Position:
         """Räknar ut retardation vid nuvarande tidpunkt om bilen bromsar"""
         retardationen = -self.bil.ANTAL_BROMSAR*(self.bil.BROMSKRAFT)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)\
               - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL
+        
+        normalkraft_framaxel = self.bil.viktförändring_fram[-1]
+        normalkraft_bakaxel = self.bil.viktförändring_bak[-1]
+        potentiell_kraft_framåt = retardationen*self.bil.MASSA_BIL/2
+
+        if normalkraft_framaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt and normalkraft_bakaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
+            retardationen = retardationen * (normalkraft_framaxel * normalkraft_bakaxel * self.bil.DÄCK_FRIKTION**2) / (potentiell_kraft_framåt**2)
+        elif normalkraft_framaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
+            retardationen = retardationen * (normalkraft_framaxel * self.bil.DÄCK_FRIKTION) / potentiell_kraft_framåt
+        elif normalkraft_bakaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
+            retardationen = retardationen * (normalkraft_bakaxel * self.bil.DÄCK_FRIKTION) / potentiell_kraft_framåt
         return retardationen
 
     def acceleration(self) -> float:
