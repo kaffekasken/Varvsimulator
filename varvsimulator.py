@@ -248,14 +248,14 @@ class GUI(ttk.Frame):
                             blixten_mcqueen.däckgrepp, blixten_mcqueen.viktförändring_fram, blixten_mcqueen.viktförändring_bak, blixten_mcqueen.vridmoment)
             #self.spara_data(kylarköping.tid, blixten_mcqueen.hastighet)
         except:
-            print("Dina inmatningsvärden är troligtvis för stora eller för små")
+           print("Dina inmatningsvärden är troligtvis för stora eller för små")
 
 @dataclass(slots=True)
 class Bil:
     """Dataklass med bilens parametrar"""
     # För position
     MASSA_BIL:          float = 270
-    UTVÄXLING:          float = 14
+    UTVÄXLING:          float = 13.3
     VRIDMOMENT_MOTOR:   float = 21
     HJULRADIE:          float = 0.23
     ANTAL_MOTORER:      int   = 4
@@ -354,20 +354,21 @@ class Position:
     def hastighet(self, position_slut: float, hastighet_slut: float) -> None:
         """Använder Euler approximation för att räkna ut hastighet"""
         while self.bil.position[-1] <= position_slut:
-            hastighet_nu = self.bil.hastighet[-1] + Position.acceleration(self)*self.steg_storlek
+            acceleration = Position.acceleration(self)
+            hastighet_nu = self.bil.hastighet[-1] + acceleration*self.steg_storlek
             position_nu = self.bil.position[-1] + self.bil.hastighet[-1]*self.steg_storlek
             tid_nu = self.bana.tid[-1] + 1*self.steg_storlek
 
-            Position.uppdatera_information(self, position_nu, hastighet_nu, tid_nu)
 
-            broms_sträcka = Position.broms_sträcka_funktion(self, hastighet_nu, hastighet_slut, Position.retardation(self))
+            bromssträcka = Position.bromssträcka_funktion(self, hastighet_nu, hastighet_slut, acceleration, Position.retardation(self))
 
-            if broms_sträcka + self.bil.position[-1] >= position_slut:
+            if bromssträcka + self.bil.position[-1] >= position_slut:
                 hastighet_nu = self.bil.hastighet[-1] + (Position.retardation(self) - Position.acceleration(self))*self.steg_storlek
                 position_nu = self.bil.position[-1] + self.bil.hastighet[-1]*self.steg_storlek
                 tid_nu = self.bana.tid[-1] + 1*self.steg_storlek
 
                 Position.uppdatera_information(self, position_nu, hastighet_nu, tid_nu)
+            Position.uppdatera_information(self, position_nu, hastighet_nu, tid_nu)
 
     def kurvhastighet(self, position_slut: float, kurvhastighet) -> None:
         """Kalkylerar kurvhastigheten"""
@@ -447,13 +448,13 @@ class Position:
         Krafter.uppdatera_krafter(self, vridmoment)
         return accel
 
-    def broms_sträcka_funktion(self, hastighet_nu:float, hastighet_slut:float, retardition:float) -> float:
-        """Kalkylerar hur långbromsträckan skulle bli om inbromsningen skulle ske vid tidpunkt t"""
-        broms_sträcka = 0
+    def bromssträcka_funktion(self, hastighet_nu:float, hastighet_slut:float, acceleration:float, retardition:float) -> float:
+        """Kalkylerar hur långbromssträckan skulle bli om inbromsningen skulle ske vid tidpunkt t"""
+        bromssträcka = 0
         while hastighet_nu > hastighet_slut:
-            hastighet_nu = hastighet_nu + retardition/2*self.steg_storlek
-            broms_sträcka = broms_sträcka + hastighet_nu*self.steg_storlek
-        return broms_sträcka
+            hastighet_nu = hastighet_nu + (retardition - acceleration)*self.steg_storlek
+            bromssträcka = bromssträcka + hastighet_nu*self.steg_storlek
+        return bromssträcka
     
     def kalkylera_rpm(self, hastighet_nu: float) -> float:
         rpm = hastighet_nu*60*14/(2*np.pi*self.bil.HJULRADIE)
