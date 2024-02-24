@@ -38,24 +38,24 @@ class GUI(ttk.Frame):
         self.etikett_antal_motorer              = ttk.Label(self.root, text= "Antal motorer", background="White").grid(row=2, column=0, sticky = W)
         self.etikett_bromskraft                 = ttk.Label(self.root, text= "Bromskraft", background="White").grid(row=2, column=1, sticky = W)
         self.etikett_antal_bromsar              = ttk.Label(self.root, text= "Antal bromsar", background="White").grid(row=2, column=2, sticky = W)
-        self.etikett_däck_friktion              = ttk.Label(self.root, text= "Däck friktion", background="White").grid(row=2, column=3, sticky = W)
+        self.etikett_däckfriktion               = ttk.Label(self.root, text= "Däckfriktion", background="White").grid(row=2, column=3, sticky = W)
         self.etikett_luftmotstånds_koefficient  = ttk.Label(self.root, text= "Luftmotstånds koefficent", background="White").grid(row=4, column=0, sticky = W)
-        self.etikett_snitt_area_bil             = ttk.Label(self.root, text= "Snitt area bil", background="White").grid(row=4, column=1, sticky = W)
+        self.etikett_snittarea_bil              = ttk.Label(self.root, text= "Snitt area bil", background="White").grid(row=4, column=1, sticky = W)
         self.etikett_lyftkrafts_koefficient     = ttk.Label(self.root, text= "Lyftkrafts koefficient", background="White").grid(row=4, column=2, sticky = W)
         self.etikett_area_vinge                 = ttk.Label(self.root, text= "Area vinge", background="White").grid(row=4, column=3, sticky = W)
         self.etikett_center_av_massa_höjd       = ttk.Label(self.root, text= "Höjd coG", background="White").grid(row=6, column=0, sticky = W)
         self.etikett_avstånd_mellan_axlar       = ttk.Label(self.root, text= "Avstånd: fram- & bakaxel", background="White").grid(row=6, column=1, sticky = W)
         self.etikett_center_av_massa_längd      = ttk.Label(self.root, text= "Längd coG", background="White").grid(row=6, column=2, sticky = W)  
-        self.etikett__center_av_tryck_höjd      = ttk.Label(self.root, text= "Höjd coP", background="White").grid(row=6, column=3, sticky = W) 
-        self.etikett__center_av_tryck_längd     = ttk.Label(self.root, text= "Längd coP", background="White").grid(row=8, column=0, sticky = W)
+        self.etikett_center_av_tryck_höjd       = ttk.Label(self.root, text= "Höjd coP", background="White").grid(row=6, column=3, sticky = W) 
+        self.etikett_center_av_tryck_längd      = ttk.Label(self.root, text= "Längd coP", background="White").grid(row=8, column=0, sticky = W)
         self.etikett_luftens_densitet           = ttk.Label(self.root, text= "Luftens densitet", background="White").grid(row=8, column=1, sticky = W)
         self.etikett_gravitation                = ttk.Label(self.root, text= "Gravitation", background="White").grid(row=8, column=2, sticky = W)
 
     def inmatning(self) -> None: # Kan inte lägga ihop .grid(...) med inmatning. Verkar inte kunna göra en for loop här heller...
         """Skapar inmatningarna"""
         #inmatningslista  = ["inmatning_massa", "inmatning_utväxling", "inmatning_vridmoment_motor", "inmatning_hjulradie", "inmatning_antal_motorer", \
-        #                    "inmatning_bromskraft", "inmatning_antal_bromsar", "inmatning_däck_friktion", "inmatning_luftmotstånds_koefficient", \
-        #                    "inmatning_snitt_area_bil", "inmatning_lyftkrafts_koefficient", "inmatning_area_vinge", "inmatning_center_av_massa_höjd", \
+        #                    "inmatning_bromskraft", "inmatning_antal_bromsar", "inmatning_däckfriktion", "inmatning_luftmotstånds_koefficient", \
+        #                    "inmatning_snittarea_bil", "inmatning_lyftkrafts_koefficient", "inmatning_area_vinge", "inmatning_center_av_massa_höjd", \
         #                    "inmatning_avstånd_mellan_axlar", "inmatning_center_av_massa_längd", "inmatning_center_av_tryck_höjd",\
         #                    "inmatning_center_av_tryck_längd", "inmatning_luftens_densitet", "inmatning_gravitation"]
 
@@ -74,9 +74,9 @@ class GUI(ttk.Frame):
         self.inmatning_antal_motorer             = ttk.Entry(self.root)
         self.inmatning_bromskraft                = ttk.Entry(self.root)
         self.inmatning_antal_bromsar             = ttk.Entry(self.root)
-        self.inmatning_däck_friktion             = ttk.Entry(self.root)
+        self.inmatning_däckfriktion              = ttk.Entry(self.root)
         self.inmatning_luftmotstånds_koefficient = ttk.Entry(self.root)
-        self.inmatning_snitt_area_bil            = ttk.Entry(self.root)
+        self.inmatning_snittarea_bil             = ttk.Entry(self.root)
         self.inmatning_lyftkrafts_koefficient    = ttk.Entry(self.root)
         self.inmatning_area_vinge                = ttk.Entry(self.root)
         self.inmatning_center_av_massa_höjd      = ttk.Entry(self.root) # Just nu tycker jag verkligen inte om tkinter
@@ -91,8 +91,8 @@ class GUI(ttk.Frame):
     def rutnät(self) -> None:
         """Placerar inmatningarna på rutnätet"""
         inmatningslista  = [self.inmatning_massa, self.inmatning_utväxling, self.inmatning_vridmoment_motor, self.inmatning_hjulradie, self.inmatning_antal_motorer, \
-                            self.inmatning_bromskraft, self.inmatning_antal_bromsar, self.inmatning_däck_friktion, self.inmatning_luftmotstånds_koefficient, \
-                            self.inmatning_snitt_area_bil, self.inmatning_lyftkrafts_koefficient, self.inmatning_area_vinge, self.inmatning_center_av_massa_höjd, \
+                            self.inmatning_bromskraft, self.inmatning_antal_bromsar, self.inmatning_däckfriktion, self.inmatning_luftmotstånds_koefficient, \
+                            self.inmatning_snittarea_bil, self.inmatning_lyftkrafts_koefficient, self.inmatning_area_vinge, self.inmatning_center_av_massa_höjd, \
                             self.inmatning_avstånd_mellan_axlar, self.inmatning_center_av_massa_längd, self.inmatning_center_av_tryck_höjd,\
                             self.inmatning_center_av_tryck_längd, self.inmatning_luftens_densitet, self.inmatning_gravitation]           
         
@@ -196,13 +196,13 @@ class GUI(ttk.Frame):
         """Här startas simuleringen"""
         # Lista för inmatningsvärden
         inmatningslista  = [self.inmatning_massa, self.inmatning_utväxling, self.inmatning_vridmoment_motor, self.inmatning_hjulradie, self.inmatning_antal_motorer, \
-                            self.inmatning_bromskraft, self.inmatning_antal_bromsar, self.inmatning_däck_friktion, self.inmatning_luftmotstånds_koefficient, \
-                            self.inmatning_snitt_area_bil, self.inmatning_lyftkrafts_koefficient, self.inmatning_area_vinge, self.inmatning_center_av_massa_höjd, \
+                            self.inmatning_bromskraft, self.inmatning_antal_bromsar, self.inmatning_däckfriktion, self.inmatning_luftmotstånds_koefficient, \
+                            self.inmatning_snittarea_bil, self.inmatning_lyftkrafts_koefficient, self.inmatning_area_vinge, self.inmatning_center_av_massa_höjd, \
                             self.inmatning_avstånd_mellan_axlar, self.inmatning_center_av_massa_längd, self.inmatning_center_av_tryck_höjd,\
                             self.inmatning_center_av_tryck_längd, self.inmatning_luftens_densitet, self.inmatning_gravitation] 
         # Lista på de variabler som kommer användas när vi gör bilen och banan
         startvärdeslista = [Bil.get_massabil(), Bil.get_utväxling(), Bil.get_vridmoment_motor(), Bil.get_hjulradie(), Bil.get_antal_motorer(), Bil.get_bromskraft(), Bil.get_antal_bromsar(),\
-                            Bil.get_däck_friktion(), Bil.get_luftmotstånds_koefficient(), Bil.get_snitt_area_bil(), Bil.get_lyftkrafts_koefficient(), Bil.get_area_vinge(), Bil.get_center_av_massa_höjd(),\
+                            Bil.get_däckfriktion(), Bil.get_luftmotstånds_koefficient(), Bil.get_snittarea_bil(), Bil.get_lyftkrafts_koefficient(), Bil.get_area_vinge(), Bil.get_center_av_massa_höjd(),\
                             Bil.get_avstånd_mellan_axlar(), Bil.get_center_av_massa_längd(), Bil.get_center_av_tryck_höjd(), Bil.get_center_av_tryck_längd(), Bana.get_luftens_densitet(), Bana.get_gravitation()]
         
         # Den faktiskta listan som används när vi behöver plocka variabler för att göra bilen och banan
@@ -222,8 +222,8 @@ class GUI(ttk.Frame):
 
         # Skapar bilen
         blixten_mcqueen     = Bil(MASSA_BIL= VARFÖR[0], UTVÄXLING= VARFÖR[1], VRIDMOMENT_MOTOR= VARFÖR[2], HJULRADIE= VARFÖR[3], ANTAL_MOTORER= VARFÖR[4], \
-                                  BROMSKRAFT= VARFÖR[5], ANTAL_BROMSAR= VARFÖR[6], DÄCK_FRIKTION= VARFÖR[7], LUFTMOTSTÅNDS_KOEFFICIENT= VARFÖR[8], \
-                                    SNITT_AREA_BIL= VARFÖR[9], LYFTKRAFTS_KOEFFICIENT= VARFÖR[10], AREA_VINGE= VARFÖR[11], CENTER_AV_MASSA_HÖJD= VARFÖR[12], \
+                                  BROMSKRAFT= VARFÖR[5], ANTAL_BROMSAR= VARFÖR[6], DÄCKFRIKTION= VARFÖR[7], LUFTMOTSTÅNDS_KOEFFICIENT= VARFÖR[8], \
+                                    SNITTAREA_BIL= VARFÖR[9], LYFTKRAFTS_KOEFFICIENT= VARFÖR[10], AREA_VINGE= VARFÖR[11], CENTER_AV_MASSA_HÖJD= VARFÖR[12], \
                                         AVSTÅND_MELLAN_AXLAR= VARFÖR[13], CENTER_AV_MASSA_LÄNGD= VARFÖR[14], CENTER_AV_TRYCK_HÖJD= VARFÖR[15], CENTER_AV_TRYCK_LÄNGD= VARFÖR[16])
         # Skapar banan
         kylarköping         = Bana(längd_raka_lista= self.längd_raka_lista, längd_kurva_lista= self.längd_kurva_lista, radie_kurvlista= self.radie_kurvlista, \
@@ -241,7 +241,7 @@ class GUI(ttk.Frame):
             krafter_blixten_mcqueen.kalkylera_maximala_kurvhastighet(self.rullstartsval.get())
             position_blixten_mcqueen.placering()
             print(f"MASSA BIL: {VARFÖR[0]}, UTVÄXLING: {VARFÖR[1]}, VRIDMOMENT MOTOR: {VARFÖR[2]}, HJULRADIE: {VARFÖR[3]}, ANTAL MOTORER: {VARFÖR[4]}, BROMSKRAFT: {VARFÖR[5]},\
-                ANTAL_BROMSAR: {VARFÖR[6]}, DÄCK_FRIKTION: {VARFÖR[7]}, LUFTMOTSTÅNDS_KOEFFICIENT: {VARFÖR[8]}, SNITT_AREA_BIL: {VARFÖR[9]}, LYFTKRAFTS_KOEFFICIENT: {VARFÖR[10]},\
+                ANTAL_BROMSAR: {VARFÖR[6]}, DÄCKFRIKTION: {VARFÖR[7]}, LUFTMOTSTÅNDS_KOEFFICIENT: {VARFÖR[8]}, SNITTAREA_BIL: {VARFÖR[9]}, LYFTKRAFTS_KOEFFICIENT: {VARFÖR[10]},\
                 AREA_VINGE: {VARFÖR[11]}, CENTER_AV_MASSA_HÖJD: {VARFÖR[12]}, AVSTÅND_MELLAN_AXLAR: {VARFÖR[13]}, CENTER_AV_MASSA_LÄNGD: {VARFÖR[14]}, CENTER_AV_TRYCK_HÖJD: {VARFÖR[15]}, \
                 CENTER_AV_TRYCK_LÄNGD: {VARFÖR[16]}, LUFTENS_DENSITET: {VARFÖR[17]}, GRAVITATION: {VARFÖR[18]}")
             self.grafritning(kylarköping.tid, blixten_mcqueen.position, blixten_mcqueen.hastighet, blixten_mcqueen.luftmotstånd, blixten_mcqueen.downforce,\
@@ -261,10 +261,10 @@ class Bil:
     ANTAL_MOTORER:      int   = 4
     BROMSKRAFT:         float = 400
     ANTAL_BROMSAR:      int   = 4
-    DÄCK_FRIKTION:      float = 0.9
+    DÄCKFRIKTION:       float = 0.9
     # För verkande krafter
     LUFTMOTSTÅNDS_KOEFFICIENT: float = 1.5
-    SNITT_AREA_BIL:            float = 1
+    SNITTAREA_BIL:             float = 1
     LYFTKRAFTS_KOEFFICIENT:    float = -6
     AREA_VINGE:                float = 1
     CENTER_AV_MASSA_HÖJD:      float = 0.23
@@ -296,12 +296,12 @@ class Bil:
         return BROMSKRAFT
     def get_antal_bromsar(ANTAL_BROMSAR= ANTAL_BROMSAR) -> float:
         return ANTAL_BROMSAR
-    def get_däck_friktion(DÄCK_FRIKTION= DÄCK_FRIKTION) -> float:
-        return DÄCK_FRIKTION
+    def get_däckfriktion(DÄCKFRIKTION= DÄCKFRIKTION) -> float:
+        return DÄCKFRIKTION
     def get_luftmotstånds_koefficient(LUFTMOTSTÅNDS_KOEFFICIENT= LUFTMOTSTÅNDS_KOEFFICIENT) -> float:
         return LUFTMOTSTÅNDS_KOEFFICIENT
-    def get_snitt_area_bil(SNITT_AREA_BIL= SNITT_AREA_BIL) -> float:
-        return SNITT_AREA_BIL
+    def get_snittarea_bil(SNITTAREA_BIL= SNITTAREA_BIL) -> float:
+        return SNITTAREA_BIL
     def get_lyftkrafts_koefficient(LYFTKRAFTS_KOEFFICIENT= LYFTKRAFTS_KOEFFICIENT) -> float:
         return LYFTKRAFTS_KOEFFICIENT
     def get_area_vinge(AREA_VINGE= AREA_VINGE) -> float:
@@ -352,13 +352,12 @@ class Position:
                 raksträcka = True
 
     def hastighet(self, position_slut: float, hastighet_slut: float) -> None:
-        """Använder Euler approximation för att räkna ut hastighet"""
+        """Använder Euler approximation för att kalkylera hastighet"""
         while self.bil.position[-1] <= position_slut:
             acceleration = Position.acceleration(self)
             hastighet_nu = self.bil.hastighet[-1] + acceleration*self.steg_storlek
             position_nu = self.bil.position[-1] + self.bil.hastighet[-1]*self.steg_storlek
             tid_nu = self.bana.tid[-1] + 1*self.steg_storlek
-
 
             bromssträcka = Position.bromssträcka_funktion(self, hastighet_nu, hastighet_slut, acceleration, Position.retardation(self))
 
@@ -395,7 +394,7 @@ class Position:
             Krafter.uppdatera_krafter(self, self.bil.VRIDMOMENT_MOTOR)
 
     def retardation(self) -> float:
-        """Räknar ut retardation vid nuvarande tidpunkt om bilen bromsar"""
+        """Räknar ut retardation vid nuvarande tidpunkt om bilen bromsar. Innefattar även tillgängligt däckgrepps kalkylation"""
         retardationen = -self.bil.ANTAL_BROMSAR*(self.bil.BROMSKRAFT)/(self.bil.HJULRADIE*self.bil.MASSA_BIL)\
               - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL
         
@@ -403,29 +402,29 @@ class Position:
         normalkraft_bakaxel = self.bil.viktförändring_bak[-1]
         potentiell_kraft_framåt = retardationen*self.bil.MASSA_BIL/2
 
-        if normalkraft_framaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt and normalkraft_bakaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
-            retardationen = retardationen * (normalkraft_framaxel * normalkraft_bakaxel * self.bil.DÄCK_FRIKTION**2) / (potentiell_kraft_framåt**2)
-        elif normalkraft_framaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
-            retardationen = retardationen * (normalkraft_framaxel * self.bil.DÄCK_FRIKTION) / potentiell_kraft_framåt
-        elif normalkraft_bakaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
-            retardationen = retardationen * (normalkraft_bakaxel * self.bil.DÄCK_FRIKTION) / potentiell_kraft_framåt
+        if normalkraft_framaxel * self.bil.DÄCKFRIKTION < potentiell_kraft_framåt and normalkraft_bakaxel * self.bil.DÄCKFRIKTION < potentiell_kraft_framåt:
+            retardationen = retardationen * (normalkraft_framaxel * normalkraft_bakaxel * self.bil.DÄCKFRIKTION**2) / (potentiell_kraft_framåt**2)
+        elif normalkraft_framaxel * self.bil.DÄCKFRIKTION < potentiell_kraft_framåt:
+            retardationen = retardationen * (normalkraft_framaxel * self.bil.DÄCKFRIKTION) / potentiell_kraft_framåt
+        elif normalkraft_bakaxel * self.bil.DÄCKFRIKTION < potentiell_kraft_framåt:
+            retardationen = retardationen * (normalkraft_bakaxel * self.bil.DÄCKFRIKTION) / potentiell_kraft_framåt
         return retardationen
 
     def acceleration(self) -> float:
-        """Räknar ut acceleration vid nuvarande tidpunkt om bilen gasar"""
+        """Innefattar uträkning för acceleration, rpm, redline, vridmoment och hur mycket grepp som finns tillgängligt"""
         mängd_bly_i_skon = 0
         vridmoment = self.bil.VRIDMOMENT_MOTOR
         min_vridmoment = vridmoment * (17/21)
         rpm = Position.kalkylera_rpm(self, self.bil.hastighet[-1])
         max_rpm = 20000
         max_vridmoment_rpm = 14000
-
+        # Vridmoment
         if rpm > max_vridmoment_rpm:
             vridmoment = min_vridmoment + (max_rpm - rpm) * (vridmoment - min_vridmoment) / (max_rpm - max_vridmoment_rpm)
-
+        # Max acceleration
         accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*(vridmoment)/(self.bil.HJULRADIE*self.bil.MASSA_BIL) \
               - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL
-
+        # Redline
         for i in range(20):
             if rpm < max_rpm:
                 break
@@ -433,23 +432,23 @@ class Position:
                 accel = self.bil.ANTAL_MOTORER*self.bil.UTVÄXLING*((self.bil.VRIDMOMENT_MOTOR + mängd_bly_i_skon))\
                      /(self.bil.HJULRADIE*self.bil.MASSA_BIL) - Krafter.luftmotstånd(self, self.bil.hastighet[-1])/self.bil.MASSA_BIL
                 mängd_bly_i_skon -= self.bil.VRIDMOMENT_MOTOR/20
-
+        # Däckgrepp
         normalkraft_framaxel = Krafter.viktöverföring_fram(self, accel) * self.bana.GRAVITATION
         normalkraft_bakaxel = Krafter.viktöverföring_bak(self, accel) * self.bana.GRAVITATION
         potentiell_kraft_framåt = accel*self.bil.MASSA_BIL/2
 
-        if normalkraft_framaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt and normalkraft_bakaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
-            accel = accel * (normalkraft_framaxel * normalkraft_bakaxel * self.bil.DÄCK_FRIKTION**2) / (potentiell_kraft_framåt**2)
-        elif normalkraft_framaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
-            accel = accel * (normalkraft_framaxel * self.bil.DÄCK_FRIKTION) / potentiell_kraft_framåt
-        elif normalkraft_bakaxel * self.bil.DÄCK_FRIKTION < potentiell_kraft_framåt:
-            accel = accel * (normalkraft_bakaxel * self.bil.DÄCK_FRIKTION) / potentiell_kraft_framåt
-
+        if normalkraft_framaxel * self.bil.DÄCKFRIKTION < potentiell_kraft_framåt and normalkraft_bakaxel * self.bil.DÄCKFRIKTION < potentiell_kraft_framåt:
+            accel = accel * (normalkraft_framaxel * normalkraft_bakaxel * self.bil.DÄCKFRIKTION**2) / (potentiell_kraft_framåt**2)
+        elif normalkraft_framaxel * self.bil.DÄCKFRIKTION < potentiell_kraft_framåt:
+            accel = accel * (normalkraft_framaxel * self.bil.DÄCKFRIKTION) / potentiell_kraft_framåt
+        elif normalkraft_bakaxel * self.bil.DÄCKFRIKTION < potentiell_kraft_framåt:
+            accel = accel * (normalkraft_bakaxel * self.bil.DÄCKFRIKTION) / potentiell_kraft_framåt
+        # Uppdatera info
         Krafter.uppdatera_krafter(self, vridmoment)
         return accel
 
     def bromssträcka_funktion(self, hastighet_nu:float, hastighet_slut:float, acceleration:float, retardition:float) -> float:
-        """Kalkylerar hur långbromssträckan skulle bli om inbromsningen skulle ske vid tidpunkt t"""
+        """Kalkylerar bromssträcka"""
         bromssträcka = 0
         while hastighet_nu > hastighet_slut:
             hastighet_nu = hastighet_nu + (retardition - acceleration)*self.steg_storlek
@@ -457,6 +456,7 @@ class Position:
         return bromssträcka
     
     def kalkylera_rpm(self, hastighet_nu: float) -> float:
+        """Kalkylerar RPM"""
         rpm = hastighet_nu*60*14/(2*np.pi*self.bil.HJULRADIE)
         return rpm
     
@@ -475,7 +475,7 @@ class Krafter:
     def kalkylera_maximala_kurvhastighet(self, rullstartsval) -> None:
         """Kalkylerar maximala möjliga kurvhastighet. Detta sker i 3 steg. 1. Utan downforce 2. Med downforce 3. Med downforce igen för lite mer precision."""
         for kurvradie in self.bana.radie_kurvlista:
-            approximerad_kurvhastighet = np.sqrt(self.bil.DÄCK_FRIKTION*self.bana.GRAVITATION*kurvradie)
+            approximerad_kurvhastighet = np.sqrt(self.bil.DÄCKFRIKTION*self.bana.GRAVITATION*kurvradie)
             for i in range(8):
                 bättre_approximerad_kurvhastighet = np.sqrt(self.däckgrepp(approximerad_kurvhastighet)/self.bil.MASSA_BIL*kurvradie)
                 approximerad_kurvhastighet = bättre_approximerad_kurvhastighet
@@ -486,12 +486,12 @@ class Krafter:
 
     def luftmotstånd(self, hastighet: float) -> float:
         """Kalkylerar bilens luftmotstånd"""
-        drag = 0.5*self.bana.LUFTENS_DENSITET*self.bil.LUFTMOTSTÅNDS_KOEFFICIENT*self.bil.SNITT_AREA_BIL*hastighet**2
+        drag = 0.5*self.bana.LUFTENS_DENSITET*self.bil.LUFTMOTSTÅNDS_KOEFFICIENT*self.bil.SNITTAREA_BIL*hastighet**2
         return drag
     
     def downforce(self, hastighet: float) -> float:
         """Kalkylerar bilens downforce"""
-        downforce_variabel = 0.5*self.bil.LYFTKRAFTS_KOEFFICIENT*self.bana.LUFTENS_DENSITET*self.bil.AREA_VINGE*hastighet**2
+        downforce_variabel = -0.5*self.bil.LYFTKRAFTS_KOEFFICIENT*self.bana.LUFTENS_DENSITET*self.bil.AREA_VINGE*hastighet**2
         return downforce_variabel
     
     def magic(self, sidohastighet: float) -> float:
@@ -507,8 +507,8 @@ class Krafter:
     
     def däckgrepp(self, hastighet: float) -> float:
         """Kalkylerar däckgreppet"""
-        normalkraft = self.bil.MASSA_BIL * self.bana.GRAVITATION - Krafter.downforce(self, hastighet)
-        däckgrepp = self.bil.DÄCK_FRIKTION * normalkraft
+        normalkraft = self.bil.MASSA_BIL * self.bana.GRAVITATION + Krafter.downforce(self, hastighet)
+        däckgrepp = self.bil.DÄCKFRIKTION * normalkraft
         return däckgrepp
     
     def viktöverföring_fram(self, acceleration: float) -> float:
@@ -516,11 +516,11 @@ class Krafter:
         viktförändring_fram = self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR + \
                             (- self.bil.MASSA_BIL*acceleration*self.bil.CENTER_AV_MASSA_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
                             - Krafter.luftmotstånd(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
-                            - Krafter.downforce(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR) / self.bana.GRAVITATION
+                            + Krafter.downforce(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR) / self.bana.GRAVITATION
         return viktförändring_fram
     
     def viktöverföring_bak(self, acceleration: float) -> float:
-        """Viktöverföringen kalkyleras genom att räkna på den nuvarande vikten på framaxeln"""
+        """Viktöverföringen kalkyleras genom att räkna på den nuvarande vikten på bakaxeln"""
         viktförändring_bak = self.bil.MASSA_BIL - self.bil.MASSA_BIL*self.bil.CENTER_AV_MASSA_LÄNGD/self.bil.AVSTÅND_MELLAN_AXLAR + \
                             (+ self.bil.MASSA_BIL*acceleration*self.bil.CENTER_AV_MASSA_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
                             + Krafter.luftmotstånd(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
