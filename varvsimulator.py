@@ -259,7 +259,7 @@ class GUI(ttk.Frame):
             CENTER_AV_TRYCK_LÄNGD: {VARFÖR[16]}, LUFTENS_DENSITET: {VARFÖR[17]}, GRAVITATION: {VARFÖR[18]}")
         self.grafritning(kylarköping.tid, blixten_mcqueen.position, blixten_mcqueen.hastighet, blixten_mcqueen.luftmotstånd, blixten_mcqueen.downforce,\
                         blixten_mcqueen.däckgrepp, blixten_mcqueen.viktförändring_fram, blixten_mcqueen.viktförändring_bak, blixten_mcqueen.vridmoment, blixten_mcqueen.låsta_bakhjul)
-        #self.spara_data(kylarköping.tid, blixten_mcqueen.hastighet)
+        self.spara_data(kylarköping.tid, blixten_mcqueen.hastighet)
         #except:
         #    print("Dina inmatningsvärden är troligtvis för stora eller för små")
 
@@ -430,16 +430,17 @@ class Position:
         normalkraft_bakaxel = self.bil.viktförändring_bak[-1]   * self.bana.GRAVITATION
         potentiell_inbromsningskraft_fram = retardationen*self.bil.MASSA_BIL*0.6
         potentiell_inbromsningskraft_bak = retardationen*self.bil.MASSA_BIL*0.4
+        kraft_vid_pedal = Krafter.kraft_vid_pedal(self, normalkraft_bakaxel/2)
         
         if normalkraft_framaxel * self.bil.DÄCKFRIKTION < -potentiell_inbromsningskraft_fram and normalkraft_bakaxel * self.bil.DÄCKFRIKTION < -potentiell_inbromsningskraft_bak:
             retardationen = retardationen * (normalkraft_framaxel * normalkraft_bakaxel * self.bil.DÄCKFRIKTION**2) / (potentiell_inbromsningskraft_bak**2)
-            self.bil.låsta_bakhjul.append(normalkraft_bakaxel * self.bil.DÄCKFRIKTION)
+            self.bil.låsta_bakhjul.append(kraft_vid_pedal)
         elif normalkraft_framaxel * self.bil.DÄCKFRIKTION < -potentiell_inbromsningskraft_fram:
             retardationen = - retardationen * (normalkraft_framaxel * self.bil.DÄCKFRIKTION) / potentiell_inbromsningskraft_bak
             self.bil.låsta_bakhjul.append(0)
         elif normalkraft_bakaxel * self.bil.DÄCKFRIKTION < -potentiell_inbromsningskraft_bak:
             retardationen = - retardationen * (normalkraft_bakaxel * self.bil.DÄCKFRIKTION) / potentiell_inbromsningskraft_bak
-            self.bil.låsta_bakhjul.append(normalkraft_bakaxel * self.bil.DÄCKFRIKTION)
+            self.bil.låsta_bakhjul.append(kraft_vid_pedal)
         else:
             self.bil.låsta_bakhjul.append(0)
         
@@ -561,6 +562,21 @@ class Krafter:
                             + Krafter.luftmotstånd(self, self.bil.hastighet[-1])*self.bil.CENTER_AV_TRYCK_HÖJD/self.bil.AVSTÅND_MELLAN_AXLAR\
                             + Krafter.downforce(self, self.bil.hastighet[-1])*(self.bil.AVSTÅND_MELLAN_AXLAR-self.bil.CENTER_AV_TRYCK_LÄNGD)/self.bil.AVSTÅND_MELLAN_AXLAR) / self.bana.GRAVITATION
         return viktförändring_bak
+    
+    def kraft_vid_pedal(self, normalkraft_bakaxel: float) -> float:
+        """Kalkylerar kraften på bromspedalen"""
+        diameter_huvud_cylinder     = 14/1000
+        diameter_bromsok            = 25/1000
+        area_huvud_cylinder         = np.pi*(diameter_huvud_cylinder/2)**2
+        area_bromsok                = np.pi*(diameter_bromsok/2)**2
+        radie_bromsskiva            = 0.08
+        utväxling_hydraul           = area_bromsok/area_huvud_cylinder
+        utväxling_bromsskiva_hjul   = radie_bromsskiva/self.bil.HJULRADIE
+        utväxling_pedal             = 150/55
+        friktionskoefficient        = 0.35
+
+        kraft_pedal = normalkraft_bakaxel*self.bil.DÄCKFRIKTION/(2*utväxling_pedal*utväxling_hydraul*friktionskoefficient*utväxling_bromsskiva_hjul)
+        return kraft_pedal
 
     def uppdatera_krafter(self, accel) -> None:
         """Uppdaterar listorna som innehåller informationen om krafterna för att kunna göra en graf"""
