@@ -123,7 +123,7 @@ class GUI(ttk.Frame):
         self.bana5           = ttk.Radiobutton(self.root, text= "Endurance", style= 'Wild.TRadiobutton', variable= self.banfil,\
                                                     value= 'endurance.txt').grid(row=100, column = 1)
 
-    def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float, viktförändring_bak: float, vridmoment: float, låsta_bakhjul: float) -> None:
+    def grafritning(self, tid: float, sträcka: float, hastighet: float, luftmotstånd: float, downforce: float, däckgrepp: float, viktförändring_fram: float, viktförändring_bak: float, vridmoment: float, låsta_bakhjul: float, låsta_framhjul: float) -> None:
         """Grafritningen"""
         fig1, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, layout='constrained')
        # graflista = [ax1, ax2, ax3, ax4]
@@ -180,16 +180,20 @@ class GUI(ttk.Frame):
 
         plt.show()
 
-        fig3, (ax1, ax2) = plt.subplots(2, 1, layout='constrained')
+        fig3, (ax1, ax2, ax3) = plt.subplots(3, 1, layout='constrained')
         
         ax1.plot(tid, låsta_bakhjul)
         ax1.set_xlabel('Tid (s)')
-        ax1.set_ylabel('Låsta bakhjul (N)')
+        ax1.set_ylabel('Kraft på bromspedal för låsta bakhjul (N)')
         ax1.grid(True)
 
-        ax2.plot(tid, hastighet)
-        ax2.set_ylabel('Hastighet (m/s)')
+        ax2.plot(tid, låsta_framhjul)
+        ax2.set_ylabel('Kraft på bromspedal för låsta framhjul (N)')
         ax2.grid(True)
+
+        ax3.plot(tid, hastighet)
+        ax3.set_ylabel('Hastighet (m/s)')
+        ax3.grid(True)
     
         plt.show()
 
@@ -258,7 +262,7 @@ class GUI(ttk.Frame):
             AREA_VINGE: {VARFÖR[11]}, CENTER_AV_MASSA_HÖJD: {VARFÖR[12]}, AVSTÅND_MELLAN_AXLAR: {VARFÖR[13]}, CENTER_AV_MASSA_LÄNGD: {VARFÖR[14]}, CENTER_AV_TRYCK_HÖJD: {VARFÖR[15]}, \
             CENTER_AV_TRYCK_LÄNGD: {VARFÖR[16]}, LUFTENS_DENSITET: {VARFÖR[17]}, GRAVITATION: {VARFÖR[18]}")
         self.grafritning(kylarköping.tid, blixten_mcqueen.position, blixten_mcqueen.hastighet, blixten_mcqueen.luftmotstånd, blixten_mcqueen.downforce,\
-                        blixten_mcqueen.däckgrepp, blixten_mcqueen.viktförändring_fram, blixten_mcqueen.viktförändring_bak, blixten_mcqueen.vridmoment, blixten_mcqueen.låsta_bakhjul)
+                        blixten_mcqueen.däckgrepp, blixten_mcqueen.viktförändring_fram, blixten_mcqueen.viktförändring_bak, blixten_mcqueen.vridmoment, blixten_mcqueen.låsta_bakhjul, blixten_mcqueen.låsta_framhjul)
         self.spara_data(kylarköping.tid, blixten_mcqueen.hastighet)
         #except:
         #    print("Dina inmatningsvärden är troligtvis för stora eller för små")
@@ -268,9 +272,9 @@ class Bil:
     """Dataklass med bilens parametrar"""
     # För position
     MASSA_BIL:          float = 270
-    UTVÄXLING:          float = 14
+    UTVÄXLING:          float = 13.3
     VRIDMOMENT_MOTOR:   float = 21
-    HJULRADIE:          float = 0.23
+    HJULRADIE:          float = 0.2032
     ANTAL_MOTORER:      int   = 4
     BROMSMOMENT:        float = 400
     ANTAL_BROMSAR:      int   = 4
@@ -296,6 +300,7 @@ class Bil:
     vridmoment:          list[float] = field(default_factory= lambda: [0])
     acceleration:        list[float] = field(default_factory= lambda: [0])
     låsta_bakhjul:       list[float] = field(default_factory= lambda: [0])
+    låsta_framhjul:      list[float] = field(default_factory= lambda: [0])
 
 #    @property #TypeError: unsupported operand type(s) for *: 'property' and 'float'. VAFAN???
     def get_massabil(MASSA_BIL= MASSA_BIL) -> float:
@@ -402,6 +407,7 @@ class Position:
             Krafter.uppdatera_krafter(self, 0)
             Position.uppdatera_information(self, position_nu, hastighet_nu, tid_nu)
             self.bil.låsta_bakhjul.append(0)
+            self.bil.låsta_framhjul.append(0)
 
         while self.bil.hastighet[-1] > kurvhastighet and self.bil.position[-1] <= position_slut:
             hastighet_nu = self.bil.hastighet[-1] + (Position.retardation(self) - Position.acceleration(self))*self.steg_storlek
@@ -420,6 +426,7 @@ class Position:
             Krafter.uppdatera_krafter(self, 0)
             Position.uppdatera_information(self, position_nu, hastighet_nu, tid_nu)
             self.bil.låsta_bakhjul.append(0)
+            self.bil.låsta_framhjul.append(0)
 
     def retardation(self) -> float:
         """Räknar ut retardation vid nuvarande tidpunkt om bilen bromsar. Innefattar även tillgängligt däckgrepps kalkylation"""
@@ -435,15 +442,18 @@ class Position:
         if normalkraft_framaxel * self.bil.DÄCKFRIKTION < -potentiell_inbromsningskraft_fram and normalkraft_bakaxel * self.bil.DÄCKFRIKTION < -potentiell_inbromsningskraft_bak:
             retardationen = retardationen * (normalkraft_framaxel * normalkraft_bakaxel * self.bil.DÄCKFRIKTION**2) / (potentiell_inbromsningskraft_bak**2)
             self.bil.låsta_bakhjul.append(kraft_vid_pedal)
+            self.bil.låsta_framhjul.append(kraft_vid_pedal)
         elif normalkraft_framaxel * self.bil.DÄCKFRIKTION < -potentiell_inbromsningskraft_fram:
             retardationen = - retardationen * (normalkraft_framaxel * self.bil.DÄCKFRIKTION) / potentiell_inbromsningskraft_bak
             self.bil.låsta_bakhjul.append(0)
+            self.bil.låsta_framhjul.append(kraft_vid_pedal)
         elif normalkraft_bakaxel * self.bil.DÄCKFRIKTION < -potentiell_inbromsningskraft_bak:
             retardationen = - retardationen * (normalkraft_bakaxel * self.bil.DÄCKFRIKTION) / potentiell_inbromsningskraft_bak
             self.bil.låsta_bakhjul.append(kraft_vid_pedal)
+            self.bil.låsta_framhjul.append(0)
         else:
             self.bil.låsta_bakhjul.append(0)
-        
+            self.bil.låsta_framhjul.append(0)
         return retardationen
 
     def acceleration(self) -> float:
