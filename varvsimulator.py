@@ -532,12 +532,14 @@ class Krafter:
 
     def luftmotstånd(self, hastighet: float) -> float:
         """Kalkylerar bilens luftmotstånd"""
-        drag = 0.5*self.bana.LUFTENS_DENSITET*self.bil.LUFTMOTSTÅNDS_KOEFFICIENT*self.bil.SNITTAREA_BIL*hastighet**2
+        lufthastighet = 0 #Hastigheten luften rör sig i samma rikting som bilen
+        drag = 0.5*self.bana.LUFTENS_DENSITET*self.bil.LUFTMOTSTÅNDS_KOEFFICIENT*(self.bil.SNITTAREA_BIL*hastighet - lufthastighet)**2
         return drag
     
     def downforce(self, hastighet: float) -> float:
         """Kalkylerar bilens downforce"""
-        downforce_variabel = -0.5*self.bil.LYFTKRAFTS_KOEFFICIENT*self.bana.LUFTENS_DENSITET*self.bil.AREA_VINGE*hastighet**2
+        lufthastighet = 0 #Hastigheten luften rör sig i samma rikting som bilen
+        downforce_variabel = -0.5*self.bil.LYFTKRAFTS_KOEFFICIENT*self.bana.LUFTENS_DENSITET*self.bil.AREA_VINGE*(hastighet - lufthastighet)**2
         return downforce_variabel
     
     def magic(self, sidohastighet: float) -> float:
